@@ -3,7 +3,7 @@ package de.super_duper_markt.models.product;
 import java.text.NumberFormat;
 import java.util.*;
 
-public abstract class BasicProduct {
+public abstract class BasicProduct implements Storable {
 
     private final double basePrice;
     private final Type type;

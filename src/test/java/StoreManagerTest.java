@@ -106,9 +106,8 @@ public class StoreManagerTest {
         Connection connection;
 
         Class.forName("com.mysql.cj.jdbc.Driver");
-        connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/superdupermarket", "root", "Deprecla12claya12");
+        connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/TABLE", "USER", "PASSWORD");
         sqlProductSourceHandler.setConnection(connection);
-        System.out.println(this.productList);
         sqlProductSourceHandler.saveProducts(this.productList);
 
         List<BasicProduct> list = productSourceHandler.getProducts();

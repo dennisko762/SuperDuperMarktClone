@@ -26,7 +26,7 @@ public class SQLProductSourceHandler extends GenericProductSourceHandler {
     public void initiateDatabaseConnection() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            this.connection = DriverManager.getConnection("jdbc:mysql://localhost/superdupermarket" + "?user=root&password=Deprecla12claya12");
+            this.connection = DriverManager.getConnection("jdbc:mysql://localhost/TABLE" + "?user=USERNAME&password=PASSWORD");
         } catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException(e);
         }

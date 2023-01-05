@@ -47,7 +47,7 @@ public class SQLProductSourceHandler extends GenericProductSourceHandler {
                 double basePrice = resultSet.getDouble("basePrice");
                 Type type = Type.valueOf(resultSet.getString("type"));
                 String date = resultSet.getString("expirationDate");
-                double maxStorageTemperature = resultSet.getDouble("maxStorageTemperature");
+                double maxStorageTemperature = resultSet.getDouble("maxStorageTemperatureCelsius");
                 LocalDate expiryDate = null;
                 if (date != null) {
                     expiryDate = LocalDate.parse(date);
@@ -68,7 +68,7 @@ public class SQLProductSourceHandler extends GenericProductSourceHandler {
     public void addProduct(BasicProduct product) {
 
         try {
-            String sql = "INSERT INTO products (description, quality, basePrice, productId, expirationDate, type, maxStorageTemperature) VALUES (?, ?, ?, ?, ? ,?, ?)";
+            String sql = "INSERT INTO products (description, quality, basePrice, productId, expirationDate, type, maxStorageTemperatureCelsius) VALUES (?, ?, ?, ?, ? ,?, ?)";
             PreparedStatement statement = this.connection.prepareStatement(sql);
             statement.setString(1, product.getDescription());
             statement.setInt(2, product.getQuality());
@@ -112,7 +112,7 @@ public class SQLProductSourceHandler extends GenericProductSourceHandler {
         for (BasicProduct product : basicProducts) {
             try {
 
-                statement = this.connection.prepareStatement("INSERT INTO products (description, quality, basePrice, productId, expirationDate, type, maxStorageTemperature) VALUES (?, ?, ?, ?, ? ,?, ?)  ON DUPLICATE KEY UPDATE quality = VALUES(quality)");
+                statement = this.connection.prepareStatement("INSERT INTO products (description, quality, basePrice, productId, expirationDate, type, maxStorageTemperatureCelsius) VALUES (?, ?, ?, ?, ? ,?, ?)  ON DUPLICATE KEY UPDATE quality = VALUES(quality)");
 
                 statement.setObject(1, product.getDescription());
                 statement.setObject(2, product.getQuality());
@@ -125,7 +125,7 @@ public class SQLProductSourceHandler extends GenericProductSourceHandler {
                     statement.setNull(5, Types.DATE);
                 }
                 statement.setObject(6, String.valueOf(product.getType()));
-                statement.setDouble(7, product.getMaxStorageTemperatureCelsius());
+                statement.setObject(7, product.getMaxStorageTemperatureCelsius());
 
                 statement.executeUpdate();
             } catch (SQLException e) {

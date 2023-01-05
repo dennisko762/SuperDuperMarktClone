@@ -193,7 +193,7 @@ public class StorageManager {
         this.productSourceHandler = ProductSourceHandlerFactory.createProductSourceHandler(dataSourceType);
 
         if (productSourceHandler.getFileType() == dataSourceType) {
-            List<BasicProduct> externallyLoadedProducts = this.productSourceHandler.getProducts();
+            List<? extends BasicProduct> externallyLoadedProducts = this.productSourceHandler.getProducts();
             for (BasicProduct externallyAddedProduct : externallyLoadedProducts) {
                 this.addProduct(externallyAddedProduct);
             }

@@ -12,8 +12,6 @@ public class ProductSourceHandlerFactory {
             case CSV:
                 String filePath = "C:\\Users\\Dennis\\Desktop\\products.csv";
                 return new CSVProductSourceHandler(fileType, filePath);
-            case CODE:
-                return new JavaProductSourceHandler(fileType);
             default:
                 throw new IllegalArgumentException("The provided file type " + fileType + "is not valid!");
         }

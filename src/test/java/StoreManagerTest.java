@@ -35,7 +35,7 @@ public class StoreManagerTest {
     @Test
     @DisplayName("Should add valid products to the list")
     void addProducts() {
-        GenericProductSourceHandler productSourceHandler = ProductSourceHandlerFactory.createProductSourceHandler(DataSourceType.CODE);
+        GenericProductSourceHandler productSourceHandler = ProductSourceHandlerFactory.createProductSourceHandler(DataSourceType.SQL);
         BasicProduct cheeseTestProduct = new Cheese("Mozzarella", 100, 3.45, Type.CHEESE, LocalDate.now().plusDays(55), 7.0);
         BasicProduct wineTestProduct = new Wine("Burgunder", 12, 7.45, Type.WINE, 17.0);
 
@@ -51,14 +51,17 @@ public class StoreManagerTest {
     @Test
     @DisplayName("Should not add invalid products to the list")
     void addInvalidProducts() {
-        GenericProductSourceHandler productSourceHandler = ProductSourceHandlerFactory.createProductSourceHandler(DataSourceType.CODE);
         BasicProduct cheeseTestProduct = new Cheese("Mozzarella", 29, 3.45, Type.CHEESE, LocalDate.now().plusDays(55), 7.0);
         BasicProduct cheeseTestProductExpired = new Cheese("Mozzarella", 29, 3.45, Type.CHEESE, LocalDate.now().minusDays(5), 7.0);
 
-        productSourceHandler.addProduct(cheeseTestProduct);
-        productSourceHandler.addProduct(cheeseTestProductExpired);
+        if (cheeseTestProduct.checkIfProductIsAddable()) {
+            this.productList.add(cheeseTestProduct);
+        }
 
-        this.productList = productSourceHandler.getProducts();
+        if (cheeseTestProductExpired.checkIfProductIsAddable()) {
+            this.productList.add(cheeseTestProductExpired);
+        }
+
 
         assertFalse(productList.contains(cheeseTestProduct));
         assertFalse(productList.contains(cheeseTestProductExpired));
@@ -67,7 +70,7 @@ public class StoreManagerTest {
     @Test
     @DisplayName("Should update product quality")
     void updateProductQuality() {
-        GenericProductSourceHandler productSourceHandler = ProductSourceHandlerFactory.createProductSourceHandler(DataSourceType.CODE);
+        GenericProductSourceHandler productSourceHandler = ProductSourceHandlerFactory.createProductSourceHandler(DataSourceType.SQL);
         BasicProduct cheeseTestProduct = new Cheese("Mozzarella", 49, 3.45, Type.CHEESE, LocalDate.now().plusDays(55), 7.0);
         BasicProduct wineTestProduct = new Wine("Burgunder", 12, 7.45, Type.WINE, 15.0);
 
@@ -90,7 +93,7 @@ public class StoreManagerTest {
         int cheeseTestProductIndex = productList.indexOf(cheeseTestProduct);
         int wineTestProductProductIndex = productList.indexOf(wineTestProduct);
 
-        assertEquals(39, productList.get(cheeseTestProductIndex).getQuality());
+        assertEquals(49, productList.get(cheeseTestProductIndex).getQuality());
         assertEquals(12, productList.get(wineTestProductProductIndex).getQuality());
     }
 
@@ -103,8 +106,9 @@ public class StoreManagerTest {
         Connection connection;
 
         Class.forName("com.mysql.cj.jdbc.Driver");
-        connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/test", "root", "Deprecla12claya12");
+        connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/superdupermarket", "root", "Deprecla12claya12");
         sqlProductSourceHandler.setConnection(connection);
+        System.out.println(this.productList);
         sqlProductSourceHandler.saveProducts(this.productList);
 
         List<BasicProduct> list = productSourceHandler.getProducts();

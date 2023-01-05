@@ -1,8 +1,7 @@
-import de.super_duper_markt.data_management.models.DataSourceType;
 import de.super_duper_markt.data_management.data_source_handler.CSVProductSourceHandler;
-import de.super_duper_markt.data_management.data_source_handler.JavaProductSourceHandler;
 import de.super_duper_markt.data_management.data_source_handler.ProductSourceHandlerFactory;
 import de.super_duper_markt.data_management.data_source_handler.SQLProductSourceHandler;
+import de.super_duper_markt.data_management.models.DataSourceType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +19,6 @@ class ProductSourceHandlerFactoryTest {
         fileType = DataSourceType.CSV;
         assertInstanceOf(CSVProductSourceHandler.class, ProductSourceHandlerFactory.createProductSourceHandler(fileType));
 
-        fileType = DataSourceType.CODE;
-        assertInstanceOf(JavaProductSourceHandler.class, ProductSourceHandlerFactory.createProductSourceHandler(fileType));
 
     }
 }

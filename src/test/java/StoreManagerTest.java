@@ -1,8 +1,11 @@
-import de.super_duper_markt.data_management.models.DataSourceType;
 import de.super_duper_markt.data_management.data_source_handler.GenericProductSourceHandler;
 import de.super_duper_markt.data_management.data_source_handler.ProductSourceHandlerFactory;
 import de.super_duper_markt.data_management.data_source_handler.SQLProductSourceHandler;
-import de.super_duper_markt.models.product.*;
+import de.super_duper_markt.data_management.models.DataSourceType;
+import de.super_duper_markt.models.product.BasicProduct;
+import de.super_duper_markt.models.product.Cheese;
+import de.super_duper_markt.models.product.Type;
+import de.super_duper_markt.models.product.Wine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,8 +25,8 @@ public class StoreManagerTest {
 
     @BeforeEach
     public void init() {
-        BasicProduct cheeseTestProduct = new Cheese("Mozzarella", 49, 3.45, Type.CHEESE, LocalDate.now().plusDays(55));
-        BasicProduct wineTestProduct = new Wine("Burgunder", 12, 7.45, Type.WINE);
+        BasicProduct cheeseTestProduct = new Cheese("Mozzarella", 49, 3.45, Type.CHEESE, LocalDate.now().plusDays(55), 7.0);
+        BasicProduct wineTestProduct = new Wine("Burgunder", 12, 7.45, Type.WINE, 13.0);
         this.productList.add(cheeseTestProduct);
         this.productList.add(wineTestProduct);
     }
@@ -33,8 +36,8 @@ public class StoreManagerTest {
     @DisplayName("Should add valid products to the list")
     void addProducts() {
         GenericProductSourceHandler productSourceHandler = ProductSourceHandlerFactory.createProductSourceHandler(DataSourceType.CODE);
-        BasicProduct cheeseTestProduct = new Cheese("Mozzarella", 100, 3.45, Type.CHEESE, LocalDate.now().plusDays(55));
-        BasicProduct wineTestProduct = new Wine("Burgunder", 12, 7.45, Type.WINE);
+        BasicProduct cheeseTestProduct = new Cheese("Mozzarella", 100, 3.45, Type.CHEESE, LocalDate.now().plusDays(55), 7.0);
+        BasicProduct wineTestProduct = new Wine("Burgunder", 12, 7.45, Type.WINE, 17.0);
 
         productSourceHandler.addProduct(cheeseTestProduct);
         productSourceHandler.addProduct(wineTestProduct);
@@ -49,8 +52,8 @@ public class StoreManagerTest {
     @DisplayName("Should not add invalid products to the list")
     void addInvalidProducts() {
         GenericProductSourceHandler productSourceHandler = ProductSourceHandlerFactory.createProductSourceHandler(DataSourceType.CODE);
-        BasicProduct cheeseTestProduct = new Cheese("Mozzarella", 29, 3.45, Type.CHEESE, LocalDate.now().plusDays(55));
-        BasicProduct cheeseTestProductExpired = new Cheese("Mozzarella", 29, 3.45, Type.CHEESE, LocalDate.now().minusDays(5));
+        BasicProduct cheeseTestProduct = new Cheese("Mozzarella", 29, 3.45, Type.CHEESE, LocalDate.now().plusDays(55), 7.0);
+        BasicProduct cheeseTestProductExpired = new Cheese("Mozzarella", 29, 3.45, Type.CHEESE, LocalDate.now().minusDays(5), 7.0);
 
         productSourceHandler.addProduct(cheeseTestProduct);
         productSourceHandler.addProduct(cheeseTestProductExpired);
@@ -65,8 +68,8 @@ public class StoreManagerTest {
     @DisplayName("Should update product quality")
     void updateProductQuality() {
         GenericProductSourceHandler productSourceHandler = ProductSourceHandlerFactory.createProductSourceHandler(DataSourceType.CODE);
-        BasicProduct cheeseTestProduct = new Cheese("Mozzarella", 49, 3.45, Type.CHEESE, LocalDate.now().plusDays(55));
-        BasicProduct wineTestProduct = new Wine("Burgunder", 12, 7.45, Type.WINE);
+        BasicProduct cheeseTestProduct = new Cheese("Mozzarella", 49, 3.45, Type.CHEESE, LocalDate.now().plusDays(55), 7.0);
+        BasicProduct wineTestProduct = new Wine("Burgunder", 12, 7.45, Type.WINE, 15.0);
 
         productSourceHandler.addProduct(cheeseTestProduct);
         productSourceHandler.addProduct(wineTestProduct);
@@ -78,10 +81,9 @@ public class StoreManagerTest {
         int days = 10;
         for (int i = 1; i <= days; i++) {
             for (BasicProduct product : this.productList) {
-                if (product instanceof Product) {
-                    ((Product) product).updateQuality(Calendar.getInstance().getTime());
-                }
+                product.updateQuality(Calendar.getInstance().getTime());
             }
+
             this.productList = productSourceHandler.getProducts();
             calendar.add(Calendar.DATE, 1);
         }
@@ -101,7 +103,7 @@ public class StoreManagerTest {
         Connection connection;
 
         Class.forName("com.mysql.cj.jdbc.Driver");
-        connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/test", "root", "root");
+        connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/test", "root", "Deprecla12claya12");
         sqlProductSourceHandler.setConnection(connection);
         sqlProductSourceHandler.saveProducts(this.productList);
 

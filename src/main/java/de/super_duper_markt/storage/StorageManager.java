@@ -11,7 +11,10 @@ import java.util.*;
 
 public class StorageManager {
     private static StorageManager storageManagerInstance;
-    private final List<BasicProduct> products;
+    private final List<BasicProduct> nonFreezerProducts;
+    private final double nonFreezerStorageTemp = 7.0;
+    private final List<FrozenProduct> freezableProducts;
+    private final double freezerStorageTemp = 2.0;
     private final Calendar calendar;
     GenericProductSourceHandler productSourceHandler;
 
@@ -20,23 +23,24 @@ public class StorageManager {
         this.calendar = Calendar.getInstance();
         this.calendar.setTime(date);
 
-        this.products = new ArrayList<>();
-        this.addProduct(new Cheese("Schimmelkäse", 50, 4.55, Type.CHEESE, LocalDate.now().plusDays(100)));
-        this.addProduct(new Cheese("Evoi Pri", 37, 4.55, Type.CHEESE, LocalDate.now().plusDays(50)));
-        this.addProduct(new Cheese("Mozarella", 55, 1.55, Type.CHEESE, LocalDate.now().plusDays(70)));
-        this.addProduct(new Cheese("Camembert", 55, 1.55, Type.CHEESE, LocalDate.now().plusDays(0)));
-        this.addProduct(new Cheese("Gauda", 29, 1.55, Type.CHEESE, LocalDate.now().plusDays(0)));
-        this.addProduct(new Wine("Yellow Wine", 0, 14.55, Type.WINE));
-        this.addProduct(new Wine("Black WIne", 1, 9.55, Type.WINE));
-        this.addProduct(new Wine("Yellow Wine", -1, 14.55, Type.WINE));
+        this.nonFreezerProducts = new ArrayList<>();
+        this.freezableProducts = new ArrayList<>();
+
+
+        this.addProduct(new Cheese("Schimmelkäse", 50, 4.55, Type.CHEESE, LocalDate.now().plusDays(100), 7.0));
+        this.addProduct(new Cheese("Evoi Pri", 37, 4.55, Type.CHEESE, LocalDate.now().plusDays(50), 7.0));
+        this.addProduct(new Cheese("Mozarella", 55, 1.55, Type.CHEESE, LocalDate.now().plusDays(70), 7.0));
+        this.addProduct(new Cheese("Camembert", 55, 1.55, Type.CHEESE, LocalDate.now().plusDays(0), 7.0));
+        this.addProduct(new Cheese("Gauda", 29, 1.55, Type.CHEESE, LocalDate.now().plusDays(0), 7.0));
+        this.addProduct(new Wine("Yellow Wine", 0, 14.55, Type.WINE, 15.0));
+        this.addProduct(new Wine("Black WIne", 1, 9.55, Type.WINE, 15.0));
+        this.addProduct(new Wine("Yellow Wine", -1, 14.55, Type.WINE, 15.0));
+        this.addProduct(new Pizza("Dr. Oethker Speciale", 100, 3.55, Type.WINE, LocalDate.now().plusDays(300), 2.0));
+        this.addProduct(new Pizza("Steinofen Salami", 30, 2.55, Type.WINE, LocalDate.now().plusDays(300), 2.0));
+        this.addProduct(new Pizza("Dominos Pizza Funghi", -1, 14.55, Type.WINE, LocalDate.now().plusDays(300), -2.0));
 
 
         System.out.println("Welcome to the Super Duper Supermarket!\n");
-        System.out.println("Your storage contains the following products:\n");
-
-        for (BasicProduct product : this.products) {
-            System.out.println(product + "\n");
-        }
     }
 
     public static synchronized StorageManager getStorageManagerInstance() {
@@ -48,6 +52,16 @@ public class StorageManager {
 
 
     public void initiateStorageManagement() {
+        System.out.println("Your storage contains the following products:\n");
+
+
+        for (BasicProduct product : this.nonFreezerProducts) {
+            System.out.println(product + "\n");
+        }
+
+        for (FrozenProduct frozenProduct : this.freezableProducts) {
+            System.out.println(frozenProduct + "\n");
+        }
 
         System.out.println("Choose one of the following options:\n 1. Show product overview for the next n days\n 2. Import products from external source\n 3. Save products to external storage\n 4. Exit\n");
         Scanner scanner = new Scanner(System.in);
@@ -88,40 +102,63 @@ public class StorageManager {
             System.out.println(calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.getDefault()) + "\n");
 
             this.checkForRemovableProducts();
-            updateProductQuality(this.products, this.calendar.getTime());
+            updateProductQuality(this.nonFreezerProducts, this.calendar.getTime());
+            updateProductQuality(this.freezableProducts, this.calendar.getTime());
 
-            for (BasicProduct product : this.products) {
+            for (BasicProduct product : this.nonFreezerProducts) {
                 System.out.println(product + "\n");
+            }
+
+            for (FrozenProduct frozenProduct : this.freezableProducts) {
+                System.out.println(frozenProduct + "\n");
             }
         }
     }
 
     public void addProduct(BasicProduct product) {
-        if (product instanceof Product) {
-            if (((Product) product).checkIfProductIsAddable() && !this.products.contains(product)) {
-                this.products.add(product);
-                System.out.println("Product: " + product.getDescription() + ", " + product.getProductId() + " was successfully added to the storage\n");
-
-            } else if (!((Product) product).checkIfProductIsAddable()) {
-                System.out.println("This product " + product.getDescription() + " does not fulfill the requirements and will not be added to the storage!\n");
+        if (product.checkIfProductIsAddable()) {
+            if (product instanceof FrozenProduct) {
+                if (product.getMaxStorageTemperatureCelsius() >= this.freezerStorageTemp) {
+                    freezableProducts.add((FrozenProduct) product);
+                }
             } else {
-                System.out.println("The productId " + product.getProductId() + " already exists in the storage\n");
+                if (product.getMaxStorageTemperatureCelsius() >= this.nonFreezerStorageTemp) {
+                    nonFreezerProducts.add(product);
+                }
             }
+            System.out.println("Product: " + product.getDescription() + ", " + product.getProductId() + " was successfully added to the storage\n");
+
+        } else if (!product.checkIfProductIsAddable()) {
+            System.out.println("This product " + product.getDescription() + " does not fulfill the requirements and will not be added to the storage!\n");
+        } else {
+            System.out.println("The productId " + product.getProductId() + " already exists in the storage\n");
         }
+
     }
 
 
-    public void removeProduct(List<BasicProduct> removableProducts) {
-        this.products.removeAll(removableProducts);
+    public void removeProduct(List<? extends BasicProduct> removableProducts) {
+        for (BasicProduct product : removableProducts) {
+            if (product instanceof FrozenProduct) {
+                this.freezableProducts.remove(product);
+            } else {
+                this.nonFreezerProducts.remove(product);
+            }
+        }
+
     }
 
     public void checkForRemovableProducts() {
         List<BasicProduct> found = new ArrayList<>();
-        for (BasicProduct product : this.products) {
-            if (product instanceof Product) {
-                if (((Product) product).checkIfProductIsRemovable()) {
-                    found.add(product);
-                }
+        for (BasicProduct product : this.nonFreezerProducts) {
+            if (product.checkIfProductIsRemovable()) {
+                found.add(product);
+            }
+        }
+
+        for (FrozenProduct frozenProduct : this.freezableProducts) {
+            if (frozenProduct.checkIfProductIsRemovable()) {
+                found.add(frozenProduct);
             }
         }
 
@@ -143,11 +180,9 @@ public class StorageManager {
 
     }
 
-    public void updateProductQuality(List<BasicProduct> products, Date currentDate) {
+    public void updateProductQuality(List<? extends BasicProduct> products, Date currentDate) {
         for (BasicProduct product : products) {
-            if (product instanceof Product) {
-                ((Product) product).updateQuality(currentDate);
-            }
+            product.updateQuality(currentDate);
         }
     }
 
@@ -162,10 +197,6 @@ public class StorageManager {
             for (BasicProduct externallyAddedProduct : externallyLoadedProducts) {
                 this.addProduct(externallyAddedProduct);
             }
-
-        }
-        for (BasicProduct product : this.products) {
-            System.out.println(product + "\n");
         }
     }
 
@@ -174,7 +205,10 @@ public class StorageManager {
         Scanner scanner = new Scanner(System.in);
         DataSourceType dataSourceType = DataSourceType.valueOf(scanner.nextLine());
         this.productSourceHandler = ProductSourceHandlerFactory.createProductSourceHandler(dataSourceType);
-        this.productSourceHandler.saveProducts(this.products);
+        List<BasicProduct> totalList = new ArrayList<>();
+        totalList.addAll(nonFreezerProducts);
+        totalList.addAll(freezableProducts);
+        this.productSourceHandler.saveProducts(totalList);
         this.initiateStorageManagement();
     }
 }

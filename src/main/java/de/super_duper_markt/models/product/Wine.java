@@ -3,9 +3,9 @@ package de.super_duper_markt.models.product;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-public class Wine extends BasicProduct implements Product {
-    public Wine(String description, int quality, double basePrice, Type type) {
-        super(description, quality, basePrice, type);
+public class Wine extends BasicProduct {
+    public Wine(String description, int quality, double basePrice, Type type, double maxStorageTemperatureCelsius) {
+        super(description, quality, basePrice, type, maxStorageTemperatureCelsius);
         this.setStorageDate(new Date());
     }
 
@@ -36,16 +36,5 @@ public class Wine extends BasicProduct implements Product {
     @Override
     public String toString() {
         return super.toString();
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
     }
 }

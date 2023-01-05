@@ -2,7 +2,7 @@ package de.super_duper_markt.data_management.data_source_handler;
 
 import de.super_duper_markt.data_management.models.DataSourceType;
 import de.super_duper_markt.models.product.BasicProduct;
-import de.super_duper_markt.models.product.Expirable;
+import de.super_duper_markt.models.product.ExpirableProduct;
 import de.super_duper_markt.models.product.Type;
 import de.super_duper_markt.models.product.factory.ProductFactory;
 import org.jetbrains.annotations.NotNull;
@@ -47,13 +47,13 @@ public class SQLProductSourceHandler extends GenericProductSourceHandler {
                 double basePrice = resultSet.getDouble("basePrice");
                 Type type = Type.valueOf(resultSet.getString("type"));
                 String date = resultSet.getString("expirationDate");
-
+                double maxStorageTemperature = resultSet.getDouble("maxStorageTemperature");
                 LocalDate expiryDate = null;
                 if (date != null) {
                     expiryDate = LocalDate.parse(date);
                 }
 
-                BasicProduct product = ProductFactory.createProduct(type, description, basePrice, quality, expiryDate);
+                BasicProduct product = ProductFactory.createProduct(type, description, basePrice, quality, expiryDate, maxStorageTemperature);
                 product.setProductId(productId);
                 products.add(product);
             }
@@ -68,16 +68,18 @@ public class SQLProductSourceHandler extends GenericProductSourceHandler {
     public void addProduct(BasicProduct product) {
 
         try {
-            String sql = "INSERT INTO products (description, quality, basePrice, productId, expirationDate, type) VALUES (?, ?, ?, ?, ? ,?)";
+            String sql = "INSERT INTO products (description, quality, basePrice, productId, expirationDate, type, maxStorageTemperature) VALUES (?, ?, ?, ?, ? ,?, ?)";
             PreparedStatement statement = this.connection.prepareStatement(sql);
             statement.setString(1, product.getDescription());
             statement.setInt(2, product.getQuality());
             statement.setDouble(3, product.getBasePrice());
             statement.setString(4, String.valueOf(product.getProductId()));
             statement.setString(6, String.valueOf(product.getType()));
+            statement.setDouble(7, product.getMaxStorageTemperatureCelsius());
 
-            if (product instanceof Expirable) {
-                Expirable addableProduct = (Expirable) product;
+
+            if (product instanceof ExpirableProduct) {
+                ExpirableProduct addableProduct = (ExpirableProduct) product;
                 statement.setDate(5, java.sql.Date.valueOf((addableProduct.getExpirationDate())));
             } else {
                 statement.setNull(5, Types.DATE);
@@ -110,19 +112,21 @@ public class SQLProductSourceHandler extends GenericProductSourceHandler {
         for (BasicProduct product : basicProducts) {
             try {
 
-                statement = this.connection.prepareStatement("INSERT INTO products (description, quality, basePrice, productId, expirationDate, type) VALUES (?, ?, ?, ?, ? ,?)  ON DUPLICATE KEY UPDATE quality = VALUES(quality)");
+                statement = this.connection.prepareStatement("INSERT INTO products (description, quality, basePrice, productId, expirationDate, type, maxStorageTemperature) VALUES (?, ?, ?, ?, ? ,?, ?)  ON DUPLICATE KEY UPDATE quality = VALUES(quality)");
 
                 statement.setObject(1, product.getDescription());
                 statement.setObject(2, product.getQuality());
                 statement.setObject(3, product.getBasePrice());
                 statement.setObject(4, String.valueOf(product.getProductId()));
-                if (product instanceof Expirable) {
-                    Expirable addableProduct = (Expirable) product;
+                if (product instanceof ExpirableProduct) {
+                    ExpirableProduct addableProduct = (ExpirableProduct) product;
                     statement.setDate(5, java.sql.Date.valueOf((addableProduct.getExpirationDate())));
                 } else {
                     statement.setNull(5, Types.DATE);
                 }
                 statement.setObject(6, String.valueOf(product.getType()));
+                statement.setDouble(7, product.getMaxStorageTemperatureCelsius());
+
                 statement.executeUpdate();
             } catch (SQLException e) {
                 throw new RuntimeException(e);

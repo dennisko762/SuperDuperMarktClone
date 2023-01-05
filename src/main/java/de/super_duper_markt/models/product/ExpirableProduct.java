@@ -5,8 +5,8 @@ import java.time.LocalDate;
 public abstract class ExpirableProduct extends BasicProduct {
     LocalDate expiryDate;
 
-    public ExpirableProduct(String description, int quality, double basePrice, Type type) {
-        super(description, quality, basePrice, type);
+    public ExpirableProduct(String description, int quality, double basePrice, Type type, double maxStorageTemperatureCelsius) {
+        super(description, quality, basePrice, type, maxStorageTemperatureCelsius);
     }
 
     public LocalDate getExpirationDate() {

@@ -12,14 +12,20 @@ public abstract class BasicProduct implements Storable {
     private int quality;
     private UUID productId;
 
-    public BasicProduct(String description, int quality, double basePrice, Type type) {
+    private final double maxStorageTemperatureCelsius;
+
+    public BasicProduct(String description, int quality, double basePrice, Type type, double maxStorageTemperatureCelsius) {
         this.description = description;
         this.quality = quality;
         this.basePrice = basePrice;
         this.productId = UUID.randomUUID();
         this.type = type;
         this.storageDate = Calendar.getInstance().getTime();
+        this.maxStorageTemperatureCelsius = maxStorageTemperatureCelsius;
+    }
 
+    public double getMaxStorageTemperatureCelsius() {
+        return maxStorageTemperatureCelsius;
     }
 
     public double getDailyPrice(int quality) {

@@ -2,8 +2,7 @@ package de.super_duper_markt.data_management.data_source_handler;
 
 import de.super_duper_markt.data_management.models.DataSourceType;
 import de.super_duper_markt.models.product.BasicProduct;
-import de.super_duper_markt.models.product.Expirable;
-import de.super_duper_markt.models.product.Product;
+import de.super_duper_markt.models.product.ExpirableProduct;
 import de.super_duper_markt.models.product.Type;
 import de.super_duper_markt.models.product.factory.ProductFactory;
 import org.apache.commons.csv.CSVFormat;
@@ -53,7 +52,8 @@ public class CSVProductSourceHandler extends GenericProductSourceHandler {
                 }
                 double basePrice = Double.parseDouble((record.get("basePrice")));
                 Type type = Type.valueOf(record.get("type"));
-                BasicProduct basicProduct = ProductFactory.createProduct(type, description, basePrice, Integer.parseInt(quality), expiryDate);
+                double maxStorageTemperature = Double.parseDouble(record.get("maxStorageTemperature"));
+                BasicProduct basicProduct = ProductFactory.createProduct(type, description, basePrice, Integer.parseInt(quality), expiryDate, maxStorageTemperature);
                 basicProduct.setProductId(UUID.fromString(record.get("productId")));
                 products.add(basicProduct);
             }
@@ -69,17 +69,12 @@ public class CSVProductSourceHandler extends GenericProductSourceHandler {
     public void addProduct(@NotNull BasicProduct product) {
         try {
             this.fileWriter = new FileWriter(this.filePath, true);
-            this.csvPrinter = new CSVPrinter(fileWriter, CSVFormat.RFC4180.builder().setHeader("description", "quality", "basePrice", "productId", "expirationDate", "type").setDelimiter(',').setSkipHeaderRecord(true).build());
+            this.csvPrinter = new CSVPrinter(fileWriter, CSVFormat.RFC4180.builder().setHeader("description", "quality", "basePrice", "productId", "expirationDate", "type", "maxStorageTemperature").setDelimiter(',').setSkipHeaderRecord(true).build());
 
-            if (product instanceof Product) {
-                Product addableProduct = (Product) product;
-                if (addableProduct.checkIfProductIsAddable()) {
-                    csvPrinter.printRecord(product);
-                } else {
-                    System.out.println("Sorry, the product: " + product.getDescription() + " doesnt meet the requirements to be added to the storage");
-                }
+            if (product.checkIfProductIsAddable()) {
+                csvPrinter.printRecord(product);
             } else {
-                System.out.println("Sorry, the provided product doesnt seem to implement the given interface");
+                System.out.println("Sorry, the product: " + product.getDescription() + " doesnt meet the requirements to be added to the storage");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -89,16 +84,15 @@ public class CSVProductSourceHandler extends GenericProductSourceHandler {
 
     @Override
     public void saveProducts(@NotNull List<BasicProduct> basicProducts) {
-
         try {
             this.fileWriter = new FileWriter(this.filePath);
-            this.csvPrinter = new CSVPrinter(fileWriter, CSVFormat.RFC4180.builder().setDelimiter(',').setHeader("description", "quality", "basePrice", "productId", "expirationDate", "type").build());
+            this.csvPrinter = new CSVPrinter(fileWriter, CSVFormat.RFC4180.builder().setDelimiter(',').setHeader("description", "quality", "basePrice", "productId", "expirationDate", "type", "maxStorageTemperature").build());
 
             basicProducts.forEach(product -> {
                 try {
                     String date;
-                    if (product instanceof Expirable) {
-                        date = String.valueOf(((Expirable) product).getExpirationDate());
+                    if (product instanceof ExpirableProduct) {
+                        date = String.valueOf(((ExpirableProduct) product).getExpirationDate());
                     } else {
                         date = "NULL";
                     }

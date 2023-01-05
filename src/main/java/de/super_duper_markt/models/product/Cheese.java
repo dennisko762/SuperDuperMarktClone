@@ -6,8 +6,8 @@ import java.util.Date;
 public class Cheese extends ExpirableProduct {
     private static final int MIN_QUALITY = 30;
 
-    public Cheese(String description, int quality, double basePrice, Type type, LocalDate expiryDate) {
-        super(description, quality, basePrice, type);
+    public Cheese(String description, int quality, double basePrice, Type type, LocalDate expiryDate, double maxStorageTemperatureCelsius) {
+        super(description, quality, basePrice, type, maxStorageTemperatureCelsius);
         this.expiryDate = expiryDate;
     }
 

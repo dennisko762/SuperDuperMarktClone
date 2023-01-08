@@ -18,6 +18,15 @@ public class SQLProductSourceHandler extends GenericProductSourceHandler {
 
     private Connection connection;
 
+    private static final String COLUMN_DESCRIPTION = "description";
+    private static final String QUALITY = "QUALITY";
+    private static final String PRODUCT_ID = "productId";
+    private static final String EXPIRATION_DATE = "expirationDate";
+    private static final String BASE_PRICE = "basePrice";
+    private static final String MAX_STORAGE_TEMPERATURE = "maxStorageTemperatureCelsius";
+
+    private static final String TYPE = "type";
+
     public SQLProductSourceHandler(DataSourceType fileType) {
         super(fileType);
         initiateDatabaseConnection();
@@ -41,13 +50,13 @@ public class SQLProductSourceHandler extends GenericProductSourceHandler {
             ResultSet resultSet = statement.executeQuery("SELECT * FROM products");
 
             while (resultSet.next()) {
-                UUID productId = UUID.fromString(resultSet.getString("productId"));
-                String description = resultSet.getString("description");
-                int quality = resultSet.getInt("quality");
-                double basePrice = resultSet.getDouble("basePrice");
-                Type type = Type.valueOf(resultSet.getString("type"));
-                String date = resultSet.getString("expirationDate");
-                double maxStorageTemperature = resultSet.getDouble("maxStorageTemperatureCelsius");
+                UUID productId = UUID.fromString(resultSet.getString(PRODUCT_ID));
+                String description = resultSet.getString(COLUMN_DESCRIPTION);
+                int quality = resultSet.getInt(QUALITY);
+                double basePrice = resultSet.getDouble(BASE_PRICE);
+                Type type = Type.valueOf(resultSet.getString(TYPE));
+                String date = resultSet.getString(EXPIRATION_DATE);
+                double maxStorageTemperature = resultSet.getDouble(MAX_STORAGE_TEMPERATURE);
                 LocalDate expiryDate = null;
                 if (date != null) {
                     expiryDate = LocalDate.parse(date);
@@ -60,7 +69,6 @@ public class SQLProductSourceHandler extends GenericProductSourceHandler {
         } catch (SQLException | NullPointerException e) {
             e.printStackTrace();
         }
-        System.out.println();
         return products;
     }
 

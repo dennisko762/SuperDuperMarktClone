@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class StoreManagerTest {
+class StoreManagerTest {
 
     List<BasicProduct> productList = new ArrayList<>();
 

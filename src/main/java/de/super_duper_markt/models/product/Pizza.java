@@ -24,8 +24,8 @@ public class Pizza extends FrozenProduct {
     }
 
     @Override
-    public double getDailyPrice(int quality) {
-        return this.getBasePrice() + quality * 0.7;
+    public double getDailyPrice() {
+        return this.getBasePrice() + this.getQuality() * 0.7;
     }
 
     @Override

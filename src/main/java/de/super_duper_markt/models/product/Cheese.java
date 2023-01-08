@@ -12,14 +12,14 @@ public class Cheese extends ExpirableProduct {
     }
 
     @Override
-    public double getDailyPrice(int quality) {
-        return this.getBasePrice() + quality * 0.1;
+    public double getDailyPrice() {
+        return this.getBasePrice() + this.getQuality() * 0.1;
     }
 
     @Override
     public void updateQuality(Date currentDate) {
         this.setQuality(this.getQuality() - 1);
-        this.getDailyPrice(this.getQuality());
+        this.getDailyPrice();
     }
 
     @Override

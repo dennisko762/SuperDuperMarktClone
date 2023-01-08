@@ -15,7 +15,7 @@ public class Wine extends BasicProduct {
     }
 
     @Override
-    public double getDailyPrice(int quality) {
+    public double getDailyPrice() {
         return this.getBasePrice();
     }
 

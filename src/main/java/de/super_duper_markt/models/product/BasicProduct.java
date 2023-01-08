@@ -14,7 +14,7 @@ public abstract class BasicProduct implements Storable {
 
     private final double maxStorageTemperatureCelsius;
 
-    public BasicProduct(String description, int quality, double basePrice, Type type, double maxStorageTemperatureCelsius) {
+    protected BasicProduct(String description, int quality, double basePrice, Type type, double maxStorageTemperatureCelsius) {
         this.description = description;
         this.quality = quality;
         this.basePrice = basePrice;
@@ -28,7 +28,7 @@ public abstract class BasicProduct implements Storable {
         return maxStorageTemperatureCelsius;
     }
 
-    public double getDailyPrice(int quality) {
+    public double getDailyPrice() {
         return this.basePrice;
     }
 
@@ -71,7 +71,7 @@ public abstract class BasicProduct implements Storable {
     @Override
     public String toString() {
         return "description= " + description +
-                ", quality= " + quality + ", daily price= " + (NumberFormat.getCurrencyInstance(Locale.GERMANY)).format(this.getDailyPrice(this.getQuality()));
+                ", quality= " + quality + ", daily price= " + (NumberFormat.getCurrencyInstance(Locale.GERMANY)).format(this.getDailyPrice());
     }
 
 

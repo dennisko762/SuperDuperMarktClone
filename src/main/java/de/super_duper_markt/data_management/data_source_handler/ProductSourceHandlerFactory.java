@@ -5,12 +5,15 @@ import org.jetbrains.annotations.NotNull;
 
 public class ProductSourceHandlerFactory {
 
+    private ProductSourceHandlerFactory() {
+    }
+
     public static GenericProductSourceHandler createProductSourceHandler(@NotNull DataSourceType fileType) {
         switch (fileType) {
             case SQL:
                 return new SQLProductSourceHandler(fileType);
             case CSV:
-                String filePath = "C:\\Users\\Dennis\\Desktop\\products.csv";
+                String filePath = "";
                 return new CSVProductSourceHandler(fileType, filePath);
             default:
                 throw new IllegalArgumentException("The provided file type " + fileType + "is not valid!");

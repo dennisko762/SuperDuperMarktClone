@@ -10,6 +10,8 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -25,6 +27,17 @@ public class CSVProductSourceHandler extends GenericProductSourceHandler {
     private FileWriter fileWriter;
     private CSVPrinter csvPrinter;
 
+    private static final Logger logger = LoggerFactory.getLogger(CSVProductSourceHandler.class);
+
+    private static final String COLUMN_DESCRIPTION = "description";
+    private static final String QUALITY = "QUALITY";
+    private static final String PRODUCT_ID = "productId";
+    private static final String EXPIRATION_DATE = "expirationDate";
+    private static final String BASE_PRICE = "basePrice";
+    private static final String MAX_STORAGE_TEMPERATURE = "maxStorageTemperatureCelsius";
+
+    private static final String TYPE = "type";
+
     public CSVProductSourceHandler(DataSourceType filetype, String filePath) {
         super(filetype);
         this.filePath = filePath;
@@ -39,10 +52,10 @@ public class CSVProductSourceHandler extends GenericProductSourceHandler {
             fileReader = new FileReader(this.filePath);
             CSVParser csvParser = CSVFormat.RFC4180.builder().setHeader().setSkipHeaderRecord(true).build().parse(fileReader);
 
-            for (CSVRecord record : csvParser) {
-                String description = record.get("description");
-                String quality = record.get("quality");
-                String unparsedExpiryDate = record.get("expirationDate");
+            for (CSVRecord csvRecord : csvParser) {
+                String description = csvRecord.get(COLUMN_DESCRIPTION);
+                String quality = csvRecord.get(QUALITY);
+                String unparsedExpiryDate = csvRecord.get(EXPIRATION_DATE);
                 LocalDate expiryDate;
 
                 if (!unparsedExpiryDate.equals("NULL")) {
@@ -50,11 +63,11 @@ public class CSVProductSourceHandler extends GenericProductSourceHandler {
                 } else {
                     expiryDate = null;
                 }
-                double basePrice = Double.parseDouble((record.get("basePrice")));
-                Type type = Type.valueOf(record.get("type"));
-                double maxStorageTemperature = Double.parseDouble(record.get("maxStorageTemperature"));
+                double basePrice = Double.parseDouble((csvRecord.get(BASE_PRICE)));
+                Type type = Type.valueOf(csvRecord.get(TYPE));
+                double maxStorageTemperature = Double.parseDouble(csvRecord.get(MAX_STORAGE_TEMPERATURE));
                 BasicProduct basicProduct = ProductFactory.createProduct(type, description, basePrice, Integer.parseInt(quality), expiryDate, maxStorageTemperature);
-                basicProduct.setProductId(UUID.fromString(record.get("productId")));
+                basicProduct.setProductId(UUID.fromString(csvRecord.get(PRODUCT_ID)));
                 products.add(basicProduct);
             }
             csvParser.close();
@@ -69,12 +82,12 @@ public class CSVProductSourceHandler extends GenericProductSourceHandler {
     public void addProduct(@NotNull BasicProduct product) {
         try {
             this.fileWriter = new FileWriter(this.filePath, true);
-            this.csvPrinter = new CSVPrinter(fileWriter, CSVFormat.RFC4180.builder().setHeader("description", "quality", "basePrice", "productId", "expirationDate", "type", "maxStorageTemperature").setDelimiter(',').setSkipHeaderRecord(true).build());
+            this.csvPrinter = new CSVPrinter(fileWriter, CSVFormat.RFC4180.builder().setHeader(COLUMN_DESCRIPTION, QUALITY, BASE_PRICE, PRODUCT_ID, EXPIRATION_DATE, TYPE, MAX_STORAGE_TEMPERATURE).setDelimiter(',').setSkipHeaderRecord(true).build());
 
             if (product.checkIfProductIsAddable()) {
                 csvPrinter.printRecord(product);
             } else {
-                System.out.println("Sorry, the product: " + product.getDescription() + " doesnt meet the requirements to be added to the storage");
+                logger.error("Sorry, the product: " + product.getDescription() + " doesnt meet the requirements to be added to the storage");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -86,7 +99,7 @@ public class CSVProductSourceHandler extends GenericProductSourceHandler {
     public void saveProducts(@NotNull List<BasicProduct> basicProducts) {
         try {
             this.fileWriter = new FileWriter(this.filePath);
-            this.csvPrinter = new CSVPrinter(fileWriter, CSVFormat.RFC4180.builder().setDelimiter(',').setHeader("description", "quality", "basePrice", "productId", "expirationDate", "type", "maxStorageTemperature").build());
+            this.csvPrinter = new CSVPrinter(fileWriter, CSVFormat.RFC4180.builder().setDelimiter(',').setHeader(COLUMN_DESCRIPTION, QUALITY, BASE_PRICE, PRODUCT_ID, EXPIRATION_DATE, TYPE, MAX_STORAGE_TEMPERATURE).build());
 
             basicProducts.forEach(product -> {
                 try {

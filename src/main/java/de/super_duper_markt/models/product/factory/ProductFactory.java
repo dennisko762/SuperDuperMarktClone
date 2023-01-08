@@ -4,6 +4,8 @@ import de.super_duper_markt.models.product.*;
 
 import java.time.LocalDate;
 public class ProductFactory {
+    private ProductFactory() {
+    }
 
     public static BasicProduct createProduct(Type type, String description, double basePrice, int quality, LocalDate expirationDate, double maxStorageTemperature) {
         switch (type) {

@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-public class ProductFactoryTest {
+class ProductFactoryTest {
 
     @Test
     @DisplayName("ProductFactory should return correct Product class")

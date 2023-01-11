@@ -16,8 +16,6 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Analyze with SonarCloud
         uses: sonarsource/sonarcloud-github-action@master
-        with:
-          projectBaseDir: SuperDuperMarkt/SuperDuperMarkt/src
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
